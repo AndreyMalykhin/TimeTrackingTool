@@ -1,0 +1,24 @@
+{
+    "extends": ["eslint:recommended", "plugin:react/recommended"],
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "impliedStrict": true,
+            "experimentalObjectRestSpread": true,
+            "jsx": true
+        }
+    },
+    "env": {
+        "es6": true,
+        "browser": true
+    },
+    "rules": {
+        "indent": ["error", 4],
+        "no-console": "off",
+        "react/jsx-indent": "error",
+        "react/jsx-closing-bracket-location": "error",
+        "react/jsx-indent-props": "error"
+    },
+    "plugins": ["react"]
+}

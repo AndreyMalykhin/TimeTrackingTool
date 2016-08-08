@@ -1,0 +1,35 @@
+{
+  "name": "time_tracking_tool",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start"
+  },
+  "dependencies": {
+    "apsl-react-native-button": "^3.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babel-preset-react-native": "^1.9.0",
+    "bottlejs": "^1.4.0",
+    "debug": "^2.2.0",
+    "eventemitter2": "^2.1.0",
+    "immutable": "^3.8.1",
+    "qs": "^6.2.1",
+    "react": "~15.2.0",
+    "react-addons-pure-render-mixin": "~15.2.0",
+    "react-native": "^0.31.0",
+    "react-native-config": "0.0.7",
+    "react-native-i18n": "0.0.8",
+    "react-native-router-flux": "^3.33.2",
+    "react-native-vector-icons": "^2.0.3",
+    "react-redux": "^4.4.5",
+    "react-timer-mixin": "^0.13.3",
+    "redux": "^3.5.2",
+    "redux-form": "^5.3.2",
+    "redux-logger": "^2.6.1",
+    "redux-thunk": "^2.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.2.2",
+    "eslint-plugin-react": "^6.0.0"
+  }
+}
