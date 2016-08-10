@@ -1,10 +1,12 @@
 import React, {PropTypes} from 'react';
+import {StyleSheet} from 'react-native';
 import {Router as ReactRouter, Scene} from 'react-native-router-flux';
 import i18n from 'react-native-i18n';
 import {connect} from 'react-redux';
 import Login from './login';
 import Timesheet from './timesheet';
 import Launcher from './launcher';
+import DayTimesheet from './day-timesheet';
 import {logout} from '../actions/auth-actions';
 
 const Router = React.createClass({
@@ -14,7 +16,7 @@ const Router = React.createClass({
 
     render() {
         return (
-            <ReactRouter getSceneStyle={() => {return {paddingTop: 64, paddingHorizontal: 8}}}>
+            <ReactRouter getSceneStyle={() => styles.scene}>
                 <Scene key='root'>
                     <Scene
                         key='launcher'
@@ -31,13 +33,26 @@ const Router = React.createClass({
                         key='timesheet'
                         component={Timesheet}
                         title={i18n.t('timesheet.title')}
-                        rightButtonTextStyle={{color: '#000', fontSize: 18, top: -3}}
+                        rightButtonTextStyle={styles.logoutBtn}
                         rightTitle='Sign out'
                         onRight={this.props.onLogout}
                     />
+                    <Scene key='dayTimesheet' component={DayTimesheet}/>
                 </Scene>
             </ReactRouter>
         );
+    }
+});
+
+const styles = StyleSheet.create({
+    scene: {
+        paddingTop: 64,
+        paddingHorizontal: 8
+    },
+    logoutBtn: {
+        color: '#000',
+        fontSize: 18,
+        top: -3
     }
 });
 

@@ -3,10 +3,12 @@ import {startSubmit, stopSubmit} from 'redux-form';
 import {Actions, ActionConst} from 'react-native-router-flux';
 import {LOGIN} from '../utils/form-type';
 import {SESSION} from '../utils/setting-id';
-import {addGenericError} from '../actions/notification-actions';
+import {addGenericError} from './notification-actions';
+import {getUser} from './user-actions';
+import {SET_SESSION} from '../utils/action-type';
 
 export function login(name, password) {
-    return (dispatch, getState, {authService, fetcher, db}) => {
+    return (dispatch, getState, {authService, userService, fetcher, db}) => {
         dispatch(startSubmit(LOGIN));
         return authService.login(name, password)
         .then((response) => {
@@ -17,16 +19,18 @@ export function login(name, password) {
                 return;
             }
 
-            fetcher.options.headers['Authorization'] =
-                `${response.token_type} ${response.access_token}`;
             dispatch(stopSubmit(LOGIN));
-            Actions.timesheet({type: ActionConst.RESET});
-            return db.setItem(SESSION, JSON.stringify({
+            const session = {
                 accessTokenType: response.token_type,
                 accessToken: response.access_token,
                 userId: response.userId,
                 expireDate: Date.now() + response.expires_in * 1000
-            }));
+            };
+            return db.setItem(SESSION, JSON.stringify(session))
+                .then(() => session);
+        })
+        .then((session) => {
+            return afterLogin(dispatch, session, fetcher, userService);
         })
         .catch((error) => {
             // TODO
@@ -37,12 +41,15 @@ export function login(name, password) {
 }
 
 export function ensureLoggedIn() {
-    return (dispatch, getState, {db}) => {
+    return (dispatch, getState, {db, fetcher, userService}) => {
         return db.getItem(SESSION)
         .then((session) => {
-            if (session && JSON.parse(session).expireDate > Date.now()) {
-                Actions.timesheet({type: ActionConst.RESET});
-                return;
+            if (session) {
+                session = JSON.parse(session);
+
+                if (session.expireDate > Date.now()) {
+                    return afterLogin(dispatch, session, fetcher, userService);
+                }
             }
 
             Actions.login({type: ActionConst.RESET});
@@ -67,4 +74,14 @@ export function logout() {
             dispatch(addGenericError());
         });
     };
+}
+
+function afterLogin(dispatch, session, fetcher) {
+    const {accessTokenType, accessToken, userId} = session;
+    fetcher.options.headers['Authorization'] =
+        `${accessTokenType} ${accessToken}`;
+    dispatch({type: SET_SESSION, payload: session});
+    return dispatch(getUser(userId)).then(() => {
+        Actions.timesheet({type: ActionConst.RESET});
+    });
 }

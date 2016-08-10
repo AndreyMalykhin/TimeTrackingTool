@@ -10,6 +10,33 @@ export default {
         submit: 'Sign in'
     },
     timesheet: {
+        week: 'Week',
         title: 'Timesheet'
+    },
+    dayTimesheet: {
+        title: 'Timesheet'
+    },
+    dayOfWeek: {
+        0: 'Mon',
+        1: 'Tue',
+        2: 'Wed',
+        3: 'Thu',
+        4: 'Fri',
+        5: 'Sat',
+        6: 'Sun'
+    },
+    month: {
+        0: 'Jan',
+        1: 'Feb',
+        2: 'Mar',
+        3: 'Apr',
+        4: 'May',
+        5: 'June',
+        6: 'July',
+        7: 'Aug',
+        8: 'Sept',
+        9: 'Oct',
+        10: 'Nov',
+        11: 'Dec'
     }
 }
