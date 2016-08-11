@@ -9,4 +9,21 @@ export default class TimeEntryService {
         return this._fetcher.fetch(
             `1/query/data/entriesByPeriod?parameters=${params}`);
     }
+
+    save(entry) {
+        if (entry.id) {
+            return this._fetcher.fetch(
+                `1/objects/timeEntries/${entry.id}?returnObject=true`,
+                {
+                    method: 'PUT',
+                    body: JSON.stringify(entry)
+                }
+            );
+        }
+
+        return this._fetcher.fetch(`1/objects/timeEntries?returnObject=true`, {
+            method: 'POST',
+            body: JSON.stringify(entry)
+        });
+    }
 }

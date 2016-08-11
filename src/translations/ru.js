@@ -14,7 +14,15 @@ export default {
         title: 'Расписание'
     },
     dayTimesheet: {
-        title: 'Timesheet'
+        empty: 'Нет записей',
+        hours: 'Часы',
+        description: 'Описание'
+    },
+    timeEntryEditor: {
+        title: 'Редактирование записи',
+        description: 'Описание',
+        hours: '{{value}} ч.',
+        save: 'Сохранить'
     },
     dayOfWeek: {
         0: 'Пн',

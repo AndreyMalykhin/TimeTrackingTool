@@ -7,6 +7,7 @@ import Login from './login';
 import Timesheet from './timesheet';
 import Launcher from './launcher';
 import DayTimesheet from './day-timesheet';
+import TimeEntryEditor from './time-entry-editor';
 import {logout} from '../actions/auth-actions';
 
 const Router = React.createClass({
@@ -38,6 +39,11 @@ const Router = React.createClass({
                         onRight={this.props.onLogout}
                     />
                     <Scene key='dayTimesheet' component={DayTimesheet}/>
+                    <Scene
+                        key='editTimeEntry'
+                        component={TimeEntryEditor}
+                        title={i18n.t('timeEntryEditor.title')}
+                    />
                 </Scene>
             </ReactRouter>
         );

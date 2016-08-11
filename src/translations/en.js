@@ -14,7 +14,15 @@ export default {
         title: 'Timesheet'
     },
     dayTimesheet: {
-        title: 'Timesheet'
+        empty: 'No entries',
+        hours: 'Hours',
+        description: 'Description'
+    },
+    timeEntryEditor: {
+        title: 'Edit entry',
+        description: 'Description',
+        hours: '{{value}} hr.',
+        save: 'Save'
     },
     dayOfWeek: {
         0: 'Mon',

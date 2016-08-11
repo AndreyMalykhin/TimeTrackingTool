@@ -4,12 +4,12 @@ import {View, Text, ListView, ActivityIndicator, StyleSheet, TouchableOpacity}
 import i18n from 'react-native-i18n';
 import {Actions} from 'react-native-router-flux';
 import {connect} from 'react-redux';
-import {getTimeEntries} from '../actions/time-entry-actions';
+import {getTimeEntriesByPeriod} from '../actions/time-entry-actions';
+import {isSameDay} from '../utils/date-utils';
 
 const Timesheet = React.createClass({
     propTypes: {
         onLoad: PropTypes.func.isRequired,
-        onViewDay: PropTypes.func.isRequired,
         isLoading: PropTypes.bool.isRequired,
         dataSource: PropTypes.instanceOf(ListView.DataSource).isRequired,
         startDate: PropTypes.string.isRequired,
@@ -19,35 +19,32 @@ const Timesheet = React.createClass({
 
     render() {
         const {dataSource, isLoading} = this.props;
-        let content;
 
         if (isLoading) {
-            content = <ActivityIndicator size='large' style={styles.loader}/>;
-        } else {
-            const daysOfWeek = [];
+            return <ActivityIndicator size='large' style={styles.loader}/>;
+        }
 
-            for (let i = 0; i < 7; ++i) {
-                daysOfWeek.push(
-                    <Text key={i} style={styles.headerColumn}>
-                        {i18n.t(`dayOfWeek.${i}`)}
-                    </Text>
-                );
-            }
+        const daysOfWeek = [];
 
-            content = (
-                <View style={styles.gridWrapper}>
-                    <View style={styles.header}>{daysOfWeek}</View>
-                    <ListView
-                        style={styles.grid}
-                        dataSource={dataSource}
-                        renderRow={this._renderRow}
-                        enableEmptySections
-                    />
-                </View>
+        for (let i = 0; i < 7; ++i) {
+            daysOfWeek.push(
+                <Text key={i} style={[styles.dayColumn, styles.headerColumn]}>
+                    {i18n.t(`dayOfWeek.${i}`)}
+                </Text>
             );
         }
 
-        return content;
+        return (
+            <View style={styles.gridWrapper}>
+                <View style={styles.header}>{daysOfWeek}</View>
+                <ListView
+                    style={styles.grid}
+                    dataSource={dataSource}
+                    renderRow={this._renderRow}
+                    enableEmptySections
+                />
+            </View>
+        );
     },
 
     componentDidMount() {
@@ -59,9 +56,11 @@ const Timesheet = React.createClass({
         const {days, weekStartDate, weekEndDate} = row;
         const dayViews = days.map((day, i) => {
             const {date, hours} = day;
-            const onPress = this.props.onViewDay.bind(this, date);
-            const style =
-                [styles.day, this._isCurrentDay(date) && styles.currentDay];
+            const onPress = this._onViewDay.bind(this, date);
+            const style = [
+                styles.dayColumn,
+                this._isCurrentDay(date) && styles.currentDayColumn
+            ];
             return (
                 <TouchableOpacity style={style} key={i} onPress={onPress}>
                     <Text>{hours}</Text>
@@ -86,10 +85,13 @@ const Timesheet = React.createClass({
     },
 
     _isCurrentDay(date) {
-        const currentDate = new Date();
-        return date.getFullYear() == currentDate.getFullYear()
-            && date.getMonth() == currentDate.getMonth()
-            && date.getDate() == currentDate.getDate();
+        return isSameDay(new Date(), date);
+    },
+
+    _onViewDay(date) {
+        const title =
+            `${i18n.t(`month.${date.getMonth()}`)} ${date.getDate()}`;
+        Actions.dayTimesheet({title, date});
     }
 });
 
@@ -107,14 +109,15 @@ const styles = StyleSheet.create({
         backgroundColor: '#CCC',
         textAlign: 'center'
     },
-    day: {
+    dayColumn: {
         flex: 1,
         paddingVertical: 16,
         marginHorizontal: 4,
         borderWidth: 1,
-        alignItems: 'center'
+        alignItems: 'center',
+        borderColor: '#CCC'
     },
-    currentDay: {
+    currentDayColumn: {
         backgroundColor: '#FDD'
     },
     daysRow: {
@@ -123,12 +126,12 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: 'row',
-        paddingBottom: 8,
         borderBottomWidth: 1,
         borderColor: '#CCC'
     },
     headerColumn: {
-        flex: 1,
+        paddingTop: 0,
+        paddingBottom: 8,
         fontWeight: 'bold',
         textAlign: 'center'
     }
@@ -138,7 +141,7 @@ function mapStateToProps(state) {
     const {timeEntries, users, auth} = state;
     const user = users.get('entities').get(auth.get('userId'));
     let endDate = new Date();
-    endDate.setHours(23, 59, 59);
+    endDate.setHours(23, 59, 59, 999);
     endDate = endDate.toISOString();
     return {
         isLoading: timeEntries.get('isLoading'),
@@ -152,12 +155,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return {
         onLoad(userId, startDate, endDate) {
-            dispatch(getTimeEntries(userId, startDate, endDate));
-        },
-        onViewDay(date) {
-            const title =
-                `${i18n.t(`month.${date.getMonth()}`)} ${date.getDate()}`;
-            Actions.dayTimesheet({title, date});
+            dispatch(getTimeEntriesByPeriod(userId, startDate, endDate));
         }
     };
 }
@@ -168,7 +166,7 @@ const dataSource = new ListView.DataSource({
 });
 
 function fillDataSource(dataSource, timeEntries) {
-    if (oldTimeEntries == timeEntries) {
+    if (oldTimeEntries && oldTimeEntries.equals(timeEntries)) {
         return dataSource;
     }
 
