@@ -19,10 +19,11 @@ export default {
         description: 'Описание'
     },
     timeEntryEditor: {
-        title: 'Редактирование записи',
+        title: 'Запись',
         description: 'Описание',
         hours: '{{value}} ч.',
-        save: 'Сохранить'
+        save: 'Сохранить',
+        remove: 'Удалить'
     },
     dayOfWeek: {
         0: 'Пн',

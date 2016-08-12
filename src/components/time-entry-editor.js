@@ -5,7 +5,7 @@ import i18n from 'react-native-i18n';
 import Immutable from 'immutable';
 import Button from './button';
 import {TIME_ENTRY} from '../utils/form-type';
-import {saveTimeEntry} from '../actions/time-entry-actions';
+import {saveTimeEntry, removeTimeEntry} from '../actions/time-entry-actions';
 
 const TimeEntryEditor = React.createClass({
     propTypes: {
@@ -14,11 +14,12 @@ const TimeEntryEditor = React.createClass({
     },
 
     render() {
-        const {fields, submitting, handleSubmit} = this.props;
+        const {fields, submitting, handleSubmit, entry} = this.props;
         const {description, hours} = fields;
         return (
             <View>
                 <TextInput
+                    editable={!submitting}
                     style={styles.control}
                     value={description.value}
                     onChangeText={description.onChange}
@@ -26,6 +27,7 @@ const TimeEntryEditor = React.createClass({
                 />
                 <View style={[styles.control, styles.hoursControl]}>
                     <Slider
+                        disabled={submitting}
                         style={styles.hoursInput}
                         value={hours.value}
                         minimumValue={1}
@@ -45,6 +47,14 @@ const TimeEntryEditor = React.createClass({
                 >
                     {i18n.t('timeEntryEditor.save')}
                 </Button>
+                {entry.get('id') &&
+                    <Button
+                        style={[styles.control, styles.removeBtn]}
+                        isLoading={submitting}
+                        onPress={handleSubmit(this._remove)}
+                    >
+                        {i18n.t('timeEntryEditor.remove')}
+                    </Button>}
             </View>
         );
     },
@@ -52,11 +62,15 @@ const TimeEntryEditor = React.createClass({
     _save({description, hours}, dispatch) {
         const {entry} = this.props;
         dispatch(saveTimeEntry({
-            id: entry.get('id'),
-            date: entry.get('date'),
+            ...entry.toJS(),
             description,
             hours
         }));
+    },
+
+    _remove(fields, dispatch) {
+        const {entry} = this.props;
+        dispatch(removeTimeEntry(entry.get('id')));
     }
 });
 
@@ -83,7 +97,7 @@ function mapStateToProps(state, ownProps) {
     return {
         initialValues: {
             description: entry.get('description'),
-            hours: entry.get('hours')
+            hours: entry.get('hours') || 1
         }
     };
 }

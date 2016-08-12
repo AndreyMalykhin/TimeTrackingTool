@@ -10,6 +10,8 @@ import DayTimesheet from './day-timesheet';
 import TimeEntryEditor from './time-entry-editor';
 import {logout} from '../actions/auth-actions';
 
+const ReactRouterWithRedux = connect()(ReactRouter);
+
 const Router = React.createClass({
     propTypes: {
         onLogout: PropTypes.func.isRequired
@@ -17,7 +19,7 @@ const Router = React.createClass({
 
     render() {
         return (
-            <ReactRouter getSceneStyle={() => styles.scene}>
+            <ReactRouterWithRedux getSceneStyle={() => styles.scene}>
                 <Scene key='root'>
                     <Scene
                         key='launcher'
@@ -45,7 +47,7 @@ const Router = React.createClass({
                         title={i18n.t('timeEntryEditor.title')}
                     />
                 </Scene>
-            </ReactRouter>
+            </ReactRouterWithRedux>
         );
     }
 });

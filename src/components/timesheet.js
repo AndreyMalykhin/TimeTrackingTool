@@ -10,6 +10,7 @@ import {isSameDay} from '../utils/date-utils';
 const Timesheet = React.createClass({
     propTypes: {
         onLoad: PropTypes.func.isRequired,
+        onViewDay: PropTypes.func.isRequired,
         isLoading: PropTypes.bool.isRequired,
         dataSource: PropTypes.instanceOf(ListView.DataSource).isRequired,
         startDate: PropTypes.string.isRequired,
@@ -56,7 +57,7 @@ const Timesheet = React.createClass({
         const {days, weekStartDate, weekEndDate} = row;
         const dayViews = days.map((day, i) => {
             const {date, hours} = day;
-            const onPress = this._onViewDay.bind(this, date);
+            const onPress = this.props.onViewDay.bind(this, date);
             const style = [
                 styles.dayColumn,
                 this._isCurrentDay(date) && styles.currentDayColumn
@@ -86,12 +87,6 @@ const Timesheet = React.createClass({
 
     _isCurrentDay(date) {
         return isSameDay(new Date(), date);
-    },
-
-    _onViewDay(date) {
-        const title =
-            `${i18n.t(`month.${date.getMonth()}`)} ${date.getDate()}`;
-        Actions.dayTimesheet({title, date});
     }
 });
 
@@ -156,6 +151,11 @@ function mapDispatchToProps(dispatch) {
     return {
         onLoad(userId, startDate, endDate) {
             dispatch(getTimeEntriesByPeriod(userId, startDate, endDate));
+        },
+        onViewDay(date) {
+            const title =
+                `${i18n.t(`month.${date.getMonth()}`)} ${date.getDate()}`;
+            Actions.dayTimesheet({title, date});
         }
     };
 }

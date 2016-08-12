@@ -4,66 +4,94 @@ import {Text, ScrollView, View, StyleSheet, TouchableOpacity} from
 import {connect} from 'react-redux';
 import i18n from 'react-native-i18n';
 import {Actions} from 'react-native-router-flux';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import Immutable from 'immutable';
 import {isSameDay} from '../utils/date-utils';
 
 const DayTimesheet = React.createClass({
     propTypes: {
+        onEditEntry: PropTypes.func.isRequired,
+        onAddEntry: PropTypes.func.isRequired,
         date: PropTypes.instanceOf(Date).isRequired,
-        entries: PropTypes.instanceOf(Immutable.List).isRequired
+        entries: PropTypes.instanceOf(Immutable.List).isRequired,
+        userId: PropTypes.number.isRequired
     },
 
     render() {
-        const {entries} = this.props;
+        const {entries, onEditEntry} = this.props;
         const entryCount = entries.size;
+        let list;
 
-        if (!entryCount) {
-            return <Text>{i18n.t('dayTimesheet.empty')}</Text>;
-        }
+        if (entryCount) {
+            const entryViews = [];
 
-        const entryViews = [];
+            entries.forEach((entry, i) => {
+                const style =
+                    [styles.row, i == entryCount - 1 && styles.lastRow];
+                entryViews.push(
+                    <TouchableOpacity
+                        onPress={onEditEntry.bind(this, entry)}
+                        style={style}
+                        key={entry.get('id')}
+                    >
+                        <Text style={styles.descriptionColumn}>
+                            {entry.get('description')}
+                        </Text>
+                        <Text style={styles.hoursColumn}>
+                            {entry.get('hours')}
+                        </Text>
+                    </TouchableOpacity>
+                );
+            });
 
-        entries.forEach((entry, i) => {
-            entryViews.push(
-                <TouchableOpacity
-                    onPress={this._onEditEntry.bind(this, entry)}
-                    style={[styles.row, i == entryCount - 1 && styles.lastRow]}
-                    key={entry.get('id')}
-                >
-                    <Text style={styles.descriptionColumn}>
-                        {entry.get('description')}
-                    </Text>
-                    <Text style={styles.hoursColumn}>
-                        {entry.get('hours')}
-                    </Text>
-                </TouchableOpacity>
+            list = (
+                <View style={styles.list}>
+                    <View style={styles.header}>
+                        <Text
+                            style={[styles.descriptionColumn, styles.headerColumn]}
+                        >
+                            {i18n.t('dayTimesheet.description')}
+                        </Text>
+                        <Text style={[styles.hoursColumn, styles.headerColumn]}>
+                            {i18n.t('dayTimesheet.hours')}
+                        </Text>
+                    </View>
+                    <ScrollView style={styles.body}>{entryViews}</ScrollView>
+                </View>
             );
-        });
+        } else {
+            list = (
+                <Text style={styles.emptyMsg}>
+                    {i18n.t('dayTimesheet.empty')}
+                </Text>
+            );
+        }
 
         return (
             <View style={styles.wrapper}>
-                <View style={styles.header}>
-                    <Text
-                        style={[styles.descriptionColumn, styles.headerColumn]}
-                    >
-                        {i18n.t('dayTimesheet.description')}
-                    </Text>
-                    <Text style={[styles.hoursColumn, styles.headerColumn]}>
-                        {i18n.t('dayTimesheet.hours')}
-                    </Text>
-                </View>
-                <ScrollView style={styles.body}>{entryViews}</ScrollView>
+                {list}
+                <TouchableOpacity
+                    style={styles.addBtn}
+                    onPress={this._onAddEntry}
+                >
+                    <Icon name="add-circle" size={64} color="#CCC"/>
+                </TouchableOpacity>
             </View>
         );
     },
 
-    _onEditEntry(entry) {
-        Actions.editTimeEntry({entry});
+    _onAddEntry() {
+        const {userId, onAddEntry} = this.props;
+        onAddEntry(userId);
     }
 });
 
 const styles = StyleSheet.create({
     wrapper: {
+        flex: 1,
+        justifyContent: 'center'
+    },
+    list: {
         flex: 1
     },
     body: {
@@ -95,15 +123,42 @@ const styles = StyleSheet.create({
         width: 80,
         padding: 16,
         textAlign: 'left'
+    },
+    addBtn: {
+        position: 'absolute',
+        bottom: 8,
+        right: 0,
+        borderWidth: 0
+    },
+    emptyMsg: {
+        textAlign: 'center'
     }
 });
 
 function mapStateToProps(state, ownProps) {
-    const {timeEntries} = state;
+    const {timeEntries, users, auth} = state;
     return {
+        userId: users.get('entities').get(auth.get('userId')).get('id'),
         entries: timeEntries.get('entities').filter(
             (entry) => isSameDay(ownProps.date, new Date(entry.get('date'))))
     };
 }
 
-export default connect(mapStateToProps)(DayTimesheet);
+function mapDispatchToProps(dispatch, {date}) {
+    return {
+        onEditEntry(entry) {
+            Actions.editTimeEntry({entry});
+        },
+        onAddEntry(userId) {
+            Actions.editTimeEntry({
+                entry: Immutable.fromJS({
+                    user: userId,
+                    date: date.toISOString(),
+                    isNew: true
+                })
+            });
+        }
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(DayTimesheet);

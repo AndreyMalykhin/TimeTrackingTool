@@ -4,7 +4,8 @@ import i18n from 'react-native-i18n';
 import {
     GET_TIME_ENTRIES_REQUEST,
     GET_TIME_ENTRIES_RESPONSE,
-    SAVE_TIME_ENTRY
+    SAVE_TIME_ENTRY,
+    REMOVE_TIME_ENTRY
 } from '../utils/action-type';
 import {addGenericError} from './notification-actions';
 import {TIME_ENTRY} from '../utils/form-type';
@@ -43,6 +44,31 @@ export function saveTimeEntry(entry) {
 
             dispatch(stopSubmit(TIME_ENTRY));
             dispatch({type: SAVE_TIME_ENTRY, payload: response});
+            Actions.pop();
+        })
+        .catch((error) => {
+            // TODO
+            console.error(error);
+            dispatch(stopSubmit(
+                TIME_ENTRY, {_error: i18n.t('common.genericError')}));
+        });
+    };
+}
+
+export function removeTimeEntry(id) {
+    return (dispatch, getState, {timeEntryService}) => {
+        dispatch(startSubmit(TIME_ENTRY));
+        return timeEntryService.remove(id)
+        .then((response) => {
+            if (response.error) {
+                const msg = response.error_description ||
+                    i18n.t('common.genericError');
+                dispatch(stopSubmit(TIME_ENTRY, {_error: msg}));
+                return;
+            }
+
+            dispatch(stopSubmit(TIME_ENTRY));
+            dispatch({type: REMOVE_TIME_ENTRY, payload: {id}});
             Actions.pop();
         })
         .catch((error) => {

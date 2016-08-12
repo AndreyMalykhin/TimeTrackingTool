@@ -19,10 +19,11 @@ export default {
         description: 'Description'
     },
     timeEntryEditor: {
-        title: 'Edit entry',
+        title: 'Entry',
         description: 'Description',
         hours: '{{value}} hr.',
-        save: 'Save'
+        save: 'Save',
+        remove: 'Remove'
     },
     dayOfWeek: {
         0: 'Mon',

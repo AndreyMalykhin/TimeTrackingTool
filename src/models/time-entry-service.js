@@ -10,7 +10,14 @@ export default class TimeEntryService {
             `1/query/data/entriesByPeriod?parameters=${params}`);
     }
 
+    remove(id) {
+        return this._fetcher.fetch(
+            `1/objects/timeEntries/${id}`, {method: 'DELETE'});
+    }
+
     save(entry) {
+        entry.isSaving = true;
+
         if (entry.id) {
             return this._fetcher.fetch(
                 `1/objects/timeEntries/${entry.id}?returnObject=true`,
