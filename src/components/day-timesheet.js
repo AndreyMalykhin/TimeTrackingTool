@@ -7,6 +7,7 @@ import {Actions} from 'react-native-router-flux';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Immutable from 'immutable';
 import {isSameDay} from '../utils/date-utils';
+import {colors} from '../styles/common-styles';
 
 const DayTimesheet = React.createClass({
     propTypes: {
@@ -74,7 +75,11 @@ const DayTimesheet = React.createClass({
                     style={styles.addBtn}
                     onPress={this._onAddEntry}
                 >
-                    <Icon name="add-circle" size={64} color="#CCC"/>
+                    <Icon
+                        name='add-circle'
+                        size={64}
+                        color={colors.secondary11}
+                    />
                 </TouchableOpacity>
             </View>
         );
@@ -99,18 +104,19 @@ const styles = StyleSheet.create({
     },
     header: {
         flexDirection: 'row',
-        backgroundColor: '#CCC'
+        backgroundColor: colors.complement0
     },
     headerColumn: {
         paddingVertical: 8,
         fontWeight: 'bold',
-        textAlign: 'left'
+        textAlign: 'left',
+        color: '#FFF'
     },
     row: {
         flexDirection: 'row',
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderColor: '#CCC'
+        borderColor: colors.complement1
     },
     lastRow: {
         borderBottomWidth: 0

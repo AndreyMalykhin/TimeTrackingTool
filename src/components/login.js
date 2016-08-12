@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TextInput} from 'react-native';
+import {View, Text, TextInput, StyleSheet} from 'react-native';
 import {reduxForm, propTypes as formPropTypes} from 'redux-form';
 import i18n from 'react-native-i18n';
 import {login} from '../actions/auth-actions';
@@ -29,6 +29,7 @@ const Login = React.createClass({
                     placeholder={i18n.t('login.password')}
                 />
                 <Button
+                    style={styles.submitBtn}
                     isDisabled={isDisabled}
                     isLoading={submitting}
                     onPress={handleSubmit(this._submit)}
@@ -41,6 +42,12 @@ const Login = React.createClass({
 
     _submit({name, password}, dispatch) {
         dispatch(login(name, password));
+    }
+});
+
+const styles = StyleSheet.create({
+    submitBtn: {
+        marginTop: 8
     }
 });
 

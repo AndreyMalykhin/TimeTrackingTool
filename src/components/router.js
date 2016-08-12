@@ -9,6 +9,7 @@ import Launcher from './launcher';
 import DayTimesheet from './day-timesheet';
 import TimeEntryEditor from './time-entry-editor';
 import {logout} from '../actions/auth-actions';
+import {colors} from '../styles/common-styles';
 
 const ReactRouterWithRedux = connect()(ReactRouter);
 
@@ -19,7 +20,11 @@ const Router = React.createClass({
 
     render() {
         return (
-            <ReactRouterWithRedux getSceneStyle={() => styles.scene}>
+            <ReactRouterWithRedux
+                titleStyle={[styles.txt, styles.title]}
+                navigationBarStyle={styles.navBar}
+                getSceneStyle={() => styles.scene}
+            >
                 <Scene key='root'>
                     <Scene
                         key='launcher'
@@ -36,7 +41,7 @@ const Router = React.createClass({
                         key='timesheet'
                         component={Timesheet}
                         title={i18n.t('timesheet.title')}
-                        rightButtonTextStyle={styles.logoutBtn}
+                        rightButtonTextStyle={[styles.txt, styles.logoutBtn]}
                         rightTitle='Sign out'
                         onRight={this.props.onLogout}
                     />
@@ -53,14 +58,23 @@ const Router = React.createClass({
 });
 
 const styles = StyleSheet.create({
+    navBar: {
+        backgroundColor: colors.primary0,
+        borderBottomColor: colors.primary3
+    },
     scene: {
         paddingTop: 64,
         paddingHorizontal: 8
     },
     logoutBtn: {
-        color: '#000',
         fontSize: 18,
         top: -3
+    },
+    txt: {
+        color: '#FFF'
+    },
+    title: {
+        fontWeight: 'bold'
     }
 });
 

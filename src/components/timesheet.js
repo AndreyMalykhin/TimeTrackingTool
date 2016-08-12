@@ -6,6 +6,7 @@ import {Actions} from 'react-native-router-flux';
 import {connect} from 'react-redux';
 import {getTimeEntriesByPeriod} from '../actions/time-entry-actions';
 import {isSameDay} from '../utils/date-utils';
+import {colors} from '../styles/common-styles';
 
 const Timesheet = React.createClass({
     propTypes: {
@@ -22,7 +23,13 @@ const Timesheet = React.createClass({
         const {dataSource, isLoading} = this.props;
 
         if (isLoading) {
-            return <ActivityIndicator size='large' style={styles.loader}/>;
+            return (
+                <ActivityIndicator
+                    color={colors.primary0}
+                    size='large'
+                    style={styles.loader}
+                />
+            );
         }
 
         const daysOfWeek = [];
@@ -58,13 +65,17 @@ const Timesheet = React.createClass({
         const dayViews = days.map((day, i) => {
             const {date, hours} = day;
             const onPress = this.props.onViewDay.bind(this, date);
-            const style = [
-                styles.dayColumn,
-                this._isCurrentDay(date) && styles.currentDayColumn
-            ];
+            const style = [styles.dayColumn];
+            let txtStyle;
+
+            if (this._isCurrentDay(date)) {
+                style.push(styles.currentDayColumn);
+                txtStyle = styles.currentDayColumnTxt;
+            }
+
             return (
                 <TouchableOpacity style={style} key={i} onPress={onPress}>
-                    <Text>{hours}</Text>
+                    <Text style={txtStyle}>{hours}</Text>
                 </TouchableOpacity>
             );
         });
@@ -101,28 +112,32 @@ const styles = StyleSheet.create({
     row: {},
     weekRow: {
         paddingVertical: 8,
-        backgroundColor: '#CCC',
-        textAlign: 'center'
+        textAlign: 'center',
+        backgroundColor: colors.complement0,
+        color: '#FFF'
     },
     dayColumn: {
         flex: 1,
         paddingVertical: 16,
         marginHorizontal: 4,
         borderWidth: 1,
+        borderRadius: 4,
         alignItems: 'center',
-        borderColor: '#CCC'
+        borderColor: colors.secondary11
     },
     currentDayColumn: {
-        backgroundColor: '#FDD'
+        borderColor: colors.secondary10,
+        backgroundColor: colors.secondary11
+    },
+    currentDayColumnTxt: {
+        color: '#FFF'
     },
     daysRow: {
         flexDirection: 'row',
         paddingVertical: 16
     },
     header: {
-        flexDirection: 'row',
-        borderBottomWidth: 1,
-        borderColor: '#CCC'
+        flexDirection: 'row'
     },
     headerColumn: {
         paddingTop: 0,

@@ -3,6 +3,7 @@ import {ActivityIndicator, StyleSheet} from 'react-native';
 import TimerMixin from 'react-timer-mixin';
 import {connect} from 'react-redux';
 import {ensureLoggedIn} from '../actions/auth-actions';
+import {colors} from '../styles/common-styles';
 
 const Launcher = React.createClass({
     propTypes: {
@@ -12,7 +13,13 @@ const Launcher = React.createClass({
     mixins: [TimerMixin],
 
     render() {
-        return <ActivityIndicator style={styles.wrapper} size='large'/>;
+        return (
+            <ActivityIndicator
+                color={colors.primary0}
+                style={styles.loader}
+                size='large'
+            />
+        );
     },
 
     componentDidMount() {
@@ -21,7 +28,7 @@ const Launcher = React.createClass({
 });
 
 const styles = StyleSheet.create({
-    wrapper: {
+    loader: {
         flex: 1
     }
 });
