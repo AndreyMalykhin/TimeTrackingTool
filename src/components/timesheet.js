@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react';
-import {View, Text, ListView, ActivityIndicator, StyleSheet, TouchableOpacity}
+import {View, Text, ScrollView, ActivityIndicator, StyleSheet, TouchableOpacity}
     from 'react-native';
 import i18n from 'react-native-i18n';
 import {Actions} from 'react-native-router-flux';
@@ -13,14 +13,14 @@ const Timesheet = React.createClass({
         onLoad: PropTypes.func.isRequired,
         onViewDay: PropTypes.func.isRequired,
         isLoading: PropTypes.bool.isRequired,
-        dataSource: PropTypes.instanceOf(ListView.DataSource).isRequired,
+        entries: PropTypes.arrayOf(PropTypes.object).isRequired,
         startDate: PropTypes.string.isRequired,
         endDate: PropTypes.string.isRequired,
         userId: PropTypes.number.isRequired
     },
 
     render() {
-        const {dataSource, isLoading} = this.props;
+        const {entries, isLoading} = this.props;
 
         if (isLoading) {
             return (
@@ -32,6 +32,22 @@ const Timesheet = React.createClass({
             );
         }
 
+        return (
+            <View style={styles.gridWrapper}>
+                {this._renderHeader()}
+                <ScrollView style={styles.grid}>
+                    {entries.map((entry) => this._renderEntry(entry))}
+                </ScrollView>
+            </View>
+        );
+    },
+
+    componentDidMount() {
+        const {onLoad, startDate, endDate, userId} = this.props;
+        onLoad(userId, startDate, endDate);
+    },
+
+    _renderHeader() {
         const daysOfWeek = [];
 
         for (let i = 0; i < 7; ++i) {
@@ -42,26 +58,11 @@ const Timesheet = React.createClass({
             );
         }
 
-        return (
-            <View style={styles.gridWrapper}>
-                <View style={styles.header}>{daysOfWeek}</View>
-                <ListView
-                    style={styles.grid}
-                    dataSource={dataSource}
-                    renderRow={this._renderRow}
-                    enableEmptySections
-                />
-            </View>
-        );
+        return <View style={styles.header}>{daysOfWeek}</View>;
     },
 
-    componentDidMount() {
-        const {onLoad, startDate, endDate, userId} = this.props;
-        onLoad(userId, startDate, endDate);
-    },
-
-    _renderRow(row) {
-        const {days, weekStartDate, weekEndDate} = row;
+    _renderEntry(entry) {
+        const {days, weekStartDate, weekEndDate} = entry;
         const dayViews = days.map((day, i) => {
             const {date, hours} = day;
             const onPress = this.props.onViewDay.bind(this, date);
@@ -81,7 +82,7 @@ const Timesheet = React.createClass({
         });
 
         return (
-            <View style={styles.row}>
+            <View key={weekStartDate.toDateString()}>
                 <Text style={styles.weekRow}>
                     {this._formatDate(weekStartDate)}
                     {' - '}
@@ -108,8 +109,9 @@ const styles = StyleSheet.create({
     gridWrapper: {
         flex: 1
     },
-    grid: {},
-    row: {},
+    grid: {
+        flex: 1
+    },
     weekRow: {
         paddingVertical: 8,
         textAlign: 'center',
@@ -158,7 +160,7 @@ function mapStateToProps(state) {
         userId: user.get('id'),
         startDate: user.get('startDate'),
         endDate,
-        dataSource: fillDataSource(dataSource, timeEntries.get('entities'))
+        entries: transformEntries(timeEntries.get('entities'))
     };
 }
 
@@ -176,17 +178,15 @@ function mapDispatchToProps(dispatch) {
 }
 
 let oldTimeEntries;
-const dataSource = new ListView.DataSource({
-    rowHasChanged: (row1, row2) => row1 != row2
-});
+let transformedTimeEntries = [];
 
-function fillDataSource(dataSource, timeEntries) {
+function transformEntries(timeEntries) {
     if (oldTimeEntries && oldTimeEntries.equals(timeEntries)) {
-        return dataSource;
+        return transformedTimeEntries;
     }
 
     oldTimeEntries = timeEntries;
-    let rows;
+    transformedTimeEntries = [];
 
     if (timeEntries.size) {
         const millisecondsPerWeek = 60 * 60 * 24 * 7 * 1000;
@@ -196,7 +196,7 @@ function fillDataSource(dataSource, timeEntries) {
         const currentWeekStartDate = new Date(firstWeekStartDate.getTime());
         const weekCount = ((lastWeekStartDate - currentWeekStartDate) /
             millisecondsPerWeek) + 1;
-        rows = new Array(weekCount);
+        transformedTimeEntries = new Array(weekCount);
         const currentDay = new Date(firstWeekStartDate.getTime());
 
         for (let week = 0; week < weekCount; ++week) {
@@ -210,7 +210,7 @@ function fillDataSource(dataSource, timeEntries) {
                 currentDay.setDate(currentDay.getDate() + 1);
             }
 
-            rows[week] = {
+            transformedTimeEntries[week] = {
                 weekStartDate: new Date(currentWeekStartDate.getTime()),
                 weekEndDate: new Date(currentWeekStartDate.getTime() +
                     millisecondsPerWeek - 1000),
@@ -223,14 +223,13 @@ function fillDataSource(dataSource, timeEntries) {
             const date = new Date(timeEntry.get('date'));
             const week =
                 Math.floor((date - firstWeekStartDate) / millisecondsPerWeek);
-            rows[week].days[getDayOfWeek(date)].hours += timeEntry.get('hours');
+            transformedTimeEntries[week].days[getDayOfWeek(date)].hours +=
+                timeEntry.get('hours');
         });
-        rows.reverse();
-    } else {
-        rows = [];
+        transformedTimeEntries.reverse();
     }
 
-    return dataSource.cloneWithRows(rows);
+    return transformedTimeEntries;
 }
 
 function getStartDateOfWeek(date) {

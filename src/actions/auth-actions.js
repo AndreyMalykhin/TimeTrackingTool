@@ -8,7 +8,7 @@ import {getUser} from './user-actions';
 import {SET_SESSION} from '../utils/action-type';
 
 export function login(name, password) {
-    return (dispatch, getState, {authService, userService, fetcher, db}) => {
+    return (dispatch, getState, {authService, fetcher, db}) => {
         dispatch(startSubmit(LOGIN));
         return authService.login(name, password)
         .then((response) => {
@@ -30,7 +30,7 @@ export function login(name, password) {
                 .then(() => session);
         })
         .then((session) => {
-            return afterLogin(dispatch, session, fetcher, userService);
+            return session && afterLogin(dispatch, session, fetcher);
         })
         .catch((error) => {
             // TODO
@@ -41,14 +41,14 @@ export function login(name, password) {
 }
 
 export function ensureLoggedIn() {
-    return (dispatch, getState, {db, fetcher, userService}) => {
+    return (dispatch, getState, {db, fetcher}) => {
         return db.getItem(SESSION)
         .then((session) => {
             if (session) {
                 session = JSON.parse(session);
 
                 if (session.expireDate > Date.now()) {
-                    return afterLogin(dispatch, session, fetcher, userService);
+                    return afterLogin(dispatch, session, fetcher);
                 }
             }
 

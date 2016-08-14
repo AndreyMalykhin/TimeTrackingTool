@@ -15,7 +15,7 @@ const Login = React.createClass({
         const isDisabled = submitting || !name.value || !password.value;
         return (
             <View>
-                {error && <Text>{error}</Text>}
+                {error && <Text style={styles.error}>{error}</Text>}
                 <TextInput
                     value={name.value}
                     onChangeText={name.onChange}
@@ -48,6 +48,9 @@ const Login = React.createClass({
 const styles = StyleSheet.create({
     submitBtn: {
         marginTop: 8
+    },
+    error: {
+        color: '#F00'
     }
 });
 
