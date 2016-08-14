@@ -42,3 +42,4 @@ android/keystores/debug.keystore
 
 android/app/src/main/assets/fonts
 .env
+android/app/prod.keystore

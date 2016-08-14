@@ -105,8 +105,17 @@ android {
             include "armeabi-v7a", "x86"
         }
     }
+    signingConfigs {
+        release {
+            storeFile file(TTT_RELEASE_STORE_FILE)
+            storePassword TTT_RELEASE_STORE_PASSWORD
+            keyAlias TTT_RELEASE_KEY_ALIAS
+            keyPassword TTT_RELEASE_KEY_PASSWORD
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
